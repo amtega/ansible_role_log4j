@@ -4,4 +4,36 @@
   hosts: molecule_hosts
   gather_facts: no
   tasks:
-    - debug: msg="Verify to be done"
+    - name: Read log4j properties file
+      command: "cat {{ log4j_properties_path }}"
+      changed_when: no
+      register: read_log4j_properties_result
+
+    - name: Assert required options are present in properties file
+      assert:
+        that:
+          - >-
+            read_log4j_properties_result.stdout
+            is search(
+                "rootLogger.appenderRef.ERROR_LOGFILE.ref = ERROR_LOGFILE")
+
+          - >-
+            read_log4j_properties_result.stdout
+            is search("appenders = AUDIT_LOGFILE, ERROR_LOGFILE")
+
+          - >-
+            read_log4j_properties_result.stdout
+            is search("appender.AUDIT_LOGFILE.layout.type = PatternLayout")
+
+          - >-
+            read_log4j_properties_result.stdout
+            is search(
+                "appender.ERROR_LOGFILE.policies.policies.type = Policies")
+
+          - >-
+            read_log4j_properties_result.stdout
+            is search("loggers = AUDIT_LOG")
+
+          - >-
+            read_log4j_properties_result.stdout
+            is search("logger.AUDIT_LOG.level = INFO")

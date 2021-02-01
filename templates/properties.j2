@@ -1,0 +1,21 @@
+{%- macro render_node(node, prefix="") -%}
+{%- for key in node.keys() | list -%}
+{%- set prefix = prefix
+                 + (prefix | length > 0) | ternary(".", "")
+                 + key -%}
+{%- set value = node[key] -%}
+{%- if value is mapping -%}
+{{ render_node(value, prefix) }}
+{%- else -%}
+{{ prefix }} = {{ (value is boolean)
+                  | ternary(value | lower, value) }}{{ "\n"}}
+{%- endif -%}
+{%- endfor -%}
+{%- endmacro -%}
+{%- set ns = namespace(properties = log4j_properties) -%}
+{%- if log4j_properties_load_from_hostvars | bool -%}
+{%- for extra_properties in log4j_properties_hostvars -%}
+{%- set ns.properties = ns.properties | combine(extra_properties) -%}
+{%- endfor -%} 
+{%- endif -%}
+{{ render_node(ns.properties) }}
