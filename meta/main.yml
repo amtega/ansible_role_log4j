@@ -2,22 +2,38 @@
 # Role dependencies
 
 galaxy_info:
-  role_name: role
-  author: author name
-  description: role description
+  role_name: log4j
+  author: Juan Antonio Valiño García
+  description: Setup log4j
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
   min_ansible_version: 2.9
   platforms:
     - name: EL
       versions:
-        - 6
         - 7
         - 8
     - name: Fedora
       versions:
-        - 29
-        - 30
-  galaxy_tags: []
+        - 32
+        - 33
+  galaxy_tags:
+    - java
+    - log4j
 
-dependencies: []
+dependencies:
+  - role: amtega.check_platform
+    vars:
+      check_platform_distributions:
+        centos: 6
+        fedora: 32
+        redhat: 6
+
+  - role: amtega.select_hostvars
+    vars:
+      select_hostvars_query:
+        pattern: "^log4j_properties_.*"
+        exclude_pattern: "^log4j_properties_path|log4j_properties_load_from_hostvars|log4j_properties_hostvars$"
+        fact_name: log4j_properties_hostvars
+        output_type: list
+    when: log4j_properties_load_from_hostvars | bool

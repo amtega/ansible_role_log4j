@@ -6,12 +6,6 @@ driver:
   name: docker
 lint: "${MOLECULE_SCENARIO_DIRECTORY}/linters.sh"
 platforms:
-  - name: "centos6-${INSTANCE_UUID:-1}"
-    image: centos:6
-    groups:
-      - molecule_hosts
-      - molecule_hosts_centos
-      - molecule_hosts_centos_6
   - name: "centos7-${INSTANCE_UUID:-1}"
     image: centos:7
     groups:
@@ -24,18 +18,18 @@ platforms:
       - molecule_hosts
       - molecule_hosts_centos
       - molecule_hosts_centos_8
-  - name: "fedora29-${INSTANCE_UUID:-1}"
-    image: fedora:29
+  - name: "fedora32-${INSTANCE_UUID:-1}"
+    image: fedora:32
     groups:
       - molecule_hosts
       - molecule_hosts_fedora
-      - molecule_hosts_fedora_29
-  - name: "fedora30-${INSTANCE_UUID:-1}"
-    image: fedora:30
+      - molecule_hosts_fedora_32
+  - name: "fedora33-${INSTANCE_UUID:-1}"
+    image: fedora:33
     groups:
       - molecule_hosts
       - molecule_hosts_fedora
-      - molecule_hosts_fedora_30
+      - molecule_hosts_fedora_33
 provisioner:
   name: ansible
   config_options:
@@ -46,6 +40,79 @@ provisioner:
     hosts:
       molecule_hosts:
         vars:
+          log4j_properties_path: /tmp/log4j.properties
+
+          log4j_properties_load_from_hostvars: yes
+
+          log4j_properties_testing:
+            rootLogger:
+              level: ERROR
+              appenderRef:
+                ERROR_LOGFILE:
+                  ref: ERROR_LOGFILE
+
+            appenders: >-
+              AUDIT_LOGFILE,
+              ERROR_LOGFILE
+
+            appender:
+              AUDIT_LOGFILE:
+                type: RollingFile
+                name: AUDIT_LOGFILE
+                fileName: /var/logs/audit.log
+                filePattern: /var/logs/audit-%d{MM-dd-yyyy}.log
+                layout:
+                  type: PatternLayout
+                  pattern: >-
+                    {{ "TID: [%tenantId] [%d] %5p {%c} - '%m%ex%n' - " 
+                       | log4j_escape
+                       + "{{ inventory_hostname }}" }}
+                policies:
+                  policies.type: Policies
+                  policies.time.type: TimeBasedTriggeringPolicy
+                  policies.time.interval: 1
+                  policies.time.modulate: true
+                  policies.size.type: SizeBasedTriggeringPolicy
+                  policies.size.size: 10MB
+                strategy:
+                  strategy.type: DefaultRolloverStrategy
+                  strategy.max: 20
+                filter:
+                  threshold.type: ThresholdFilter
+                  threshold.level: INFO
+
+              ERROR_LOGFILE:
+                type: RollingFile
+                name: ERROR_LOGFILE
+                fileName: /var/logs/errors.log
+                filePattern: >-
+                  /var/logs/wso2-apigw-errors-%d{MM-dd-yyyy}-%i.log.gz
+                layout:
+                  type: PatternLayout
+                  pattern: "%d{ISO8601} [%X{ip}-%X{host}] [%t] %5p %c{1} %m%n"
+                policies:
+                  policies.type: Policies
+                  policies.time.type: TimeBasedTriggeringPolicy
+                  policies.time.interval: 1
+                  policies.time.modulate: true
+                  policies.size.type: SizeBasedTriggeringPolicy
+                  policies.size.size: 10MB
+                strategy:
+                  strategy.type: DefaultRolloverStrategy
+                  strategy.max: 20
+                filter:
+                  threshold.type: ThresholdFilter
+                  threshold.level: WARN
+
+            loggers: AUDIT_LOG
+
+            logger:
+              AUDIT_LOG:
+                name: AUDIT_LOG
+                level: INFO
+                ref: AUDIT_LOGFILE
+                additivity: false
+
       molecule_hosts_fedora:
         vars:
           ansible_python_interpreter: /usr/bin/python3

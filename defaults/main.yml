@@ -1,2 +1,30 @@
 ---
 # Role default lower priority variables
+
+# Path to the properties file to manage. If not specific no properties will be
+# setup
+
+log4j_properties_path:
+
+# Dictionary with the log4j properties to configure. The hierarchy of the dict
+# will be translated to the properties file. For example, the following dict:
+#
+# {
+#   a:
+#     b:
+#       c:
+#         d: value
+# }
+#
+# will be translated into the following option in the properties file:
+#
+# a.b.c.d = value
+
+log4j_properties: {}
+
+# Indicate `log4j_properties` must be loaded also from host variables. Any host
+# variable that begins with "log4j_properties_*" and contains the necessary
+# attributes will be loaded as an item to manage by the role. The variables must
+# follow the structure detailed before for `log4j_properties`
+
+log4j_properties_load_from_hostvars: no

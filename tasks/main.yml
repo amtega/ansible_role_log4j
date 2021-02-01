@@ -1,2 +1,11 @@
 ---
 # Role tasks
+
+- name: Setup log4j2 properties file
+  template:
+    src: properties.j2
+    dest: "{{ log4j_properties_path }}"
+    mode: 0640
+  when: log4j_properties_path | default("") | length > 0
+  tags:
+    - role::log4j2
