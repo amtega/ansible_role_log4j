@@ -7,5 +7,6 @@
     dest: "{{ log4j_properties_path }}"
     mode: 0640
   when: log4j_properties_path | default("") | length > 0
+  notify: "{{ log4j_notify }}"
   tags:
     - role::log4j2
