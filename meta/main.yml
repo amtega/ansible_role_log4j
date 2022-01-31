@@ -3,11 +3,12 @@
 
 galaxy_info:
   role_name: log4j
+  namespace: amtega
   author: Juan Antonio Valiño García
   description: Setup log4j
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
-  min_ansible_version: 2.9
+  min_ansible_version: 2.10
   platforms:
     - name: EL
       versions:
@@ -15,8 +16,8 @@ galaxy_info:
         - 8
     - name: Fedora
       versions:
-        - 32
-        - 33
+        - 34
+        - 35
   galaxy_tags:
     - java
     - log4j
@@ -26,7 +27,7 @@ dependencies:
     vars:
       check_platform_distributions:
         centos: 6
-        fedora: 32
+        fedora: 34
         redhat: 6
 
   - role: amtega.select_hostvars
